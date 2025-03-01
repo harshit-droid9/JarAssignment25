@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "tech.oklocation.jar.assignment"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "tech.oklocation.jar.assignment"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -36,6 +36,12 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+
+    packaging {
+        resources {
+            excludes += "META-INF/gradle/incremental.annotation.processors"
+        }
     }
 }
 
