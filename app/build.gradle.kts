@@ -67,6 +67,9 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.hilt.android.compiler)
 
+
+    implementation(libs.coil.compose)
+
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.android)
 
