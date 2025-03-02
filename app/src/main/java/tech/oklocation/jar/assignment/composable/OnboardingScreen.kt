@@ -3,8 +3,10 @@ package tech.oklocation.jar.assignment.composable
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -38,6 +40,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -46,6 +50,8 @@ import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import tech.oklocation.jar.assignment.R
+import tech.oklocation.jar.assignment.ui.theme.White
 
 data class OnboardingScreen(
     val image: String,
@@ -65,10 +71,7 @@ class CardState(
 )
 
 suspend fun animateCardBottomToCenter(
-    cardState: CardState,
-    snappingPoint: Float,
-    expandedHeightPx: Float,
-    durationMillis: Int = 800
+    cardState: CardState, snappingPoint: Float, expandedHeightPx: Float, durationMillis: Int = 800
 ) {
     val animSpec = tween<Float>(durationMillis, easing = FastOutSlowInEasing)
 
@@ -78,10 +81,7 @@ suspend fun animateCardBottomToCenter(
 }
 
 suspend fun animateCardCenterToTop(
-    cardState: CardState,
-    topOffsetPx: Float,
-    collapsedHeightPx: Float,
-    durationMillis: Int = 600
+    cardState: CardState, topOffsetPx: Float, collapsedHeightPx: Float, durationMillis: Int = 600
 ) {
     val animSpec = tween<Float>(durationMillis, easing = FastOutSlowInEasing)
 
@@ -92,9 +92,7 @@ suspend fun animateCardCenterToTop(
 
 @Composable
 fun OnboardingCarousel(
-    screens: List<OnboardingScreen>,
-    onFinished: () -> Unit = {},
-    autoScrollDelayMs: Long = 2000
+    screens: List<OnboardingScreen>, onFinished: () -> Unit = {}, autoScrollDelayMs: Long = 2000
 ) {
     val config = LocalConfiguration.current
     val density = LocalDensity.current
@@ -114,9 +112,9 @@ fun OnboardingCarousel(
     val snappingPoints = remember {
         List(screens.size) {
             when (it) {
-                0 -> screenHeightPx * 0.2f
-                1 -> screenHeightPx * 0.6f
-                2 -> screenHeightPx * 0.4f
+                0 -> screenHeightPx * 0.15f
+                1 -> screenHeightPx * 0.7f
+                2 -> screenHeightPx * 0.7f
                 else -> screenHeightPx * 0.5f
             }
         }
@@ -184,13 +182,13 @@ fun OnboardingCarousel(
             Brush.verticalGradient(
                 colors = listOf(
                     parseColor(card.startGradient),
-                    parseColor(card.endGradient)
-                ),
-                startY = 0f,
-                endY = screenHeightPx
+                    parseColor(card.endGradient).copy(alpha = 0.32f)
+                ), startY = 0f, endY = screenHeightPx
             )
         }
     }
+
+    val cardBackgroundColor = remember(currentIndex) { screens[currentIndex].backGroundColor }
 
     Box(
         modifier = Modifier
@@ -207,13 +205,13 @@ fun OnboardingCarousel(
             screens.indices.forEach { index ->
                 val cardState = cardStates[index]
                 val yOffset = cardState.yOffset.value
-                val heightPx = cardState.height.value
                 val alpha = cardState.alpha.value
 
                 OnboardingCard(
                     screenHeightPx = screenHeightPx,
                     screen = screens[index],
-                    heightPx = heightPx,
+                    cardState = cardState,
+                    backGroundColor = cardBackgroundColor,
                     modifier = Modifier
                         .padding(bottom = 16.dp)
                         .graphicsLayer { translationY = yOffset }
@@ -229,25 +227,20 @@ fun OnboardingCarousel(
 @Composable
 fun OnboardingCard(
     screen: OnboardingScreen,
-    heightPx: Float,
     modifier: Modifier = Modifier,
-    screenHeightPx: Float
+    screenHeightPx: Float,
+    cardState: CardState,
+    backGroundColor: String
 ) {
     val density = LocalDensity.current
-    val heightDp = with(density) { heightPx.toDp() }
+    val heightDp = with(density) { cardState.height.value.toDp() }
 
-    val backgroundColor = parseColor("#28085C52").copy(
-        alpha = 0.32f
-    )
+    val backgroundColor = parseColor(backGroundColor).copy(alpha = 0.32f)
     val strokeGradient = Brush.verticalGradient(
         colors = listOf(
-            parseColor(screen.strokeStartColor),
-            parseColor(screen.strokeEndColor)
-        ),
-        startY = 0f,
-        endY = screenHeightPx
+            parseColor(screen.strokeStartColor), parseColor(screen.strokeEndColor)
+        ), startY = 0f, endY = screenHeightPx
     )
-
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -277,16 +270,16 @@ fun HeaderSection() {
 
         Icon(
             modifier = Modifier,
-            imageVector = Icons.Default.ArrowBack,
+            painter = painterResource(R.drawable.ic_back_button),
             contentDescription = "back button",
             tint = Color.White
         )
 
         Text(
-            text = "Onboarding",
-            color = Color.White,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
+            text = stringResource(R.string.onboarding),
+            style = MaterialTheme.typography.headlineMedium.copy(
+                color = MaterialTheme.colorScheme.onPrimary
+            ),
             modifier = Modifier.padding(start = 16.dp)
         )
     }
@@ -295,42 +288,37 @@ fun HeaderSection() {
 @Composable
 fun CollapsedCardContent(screen: OnboardingScreen) {
     Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxSize()
+        verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxSize()
     ) {
         Box(
             modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(Color.White.copy(alpha = 0.2f)),
+                .size(32.dp)
+                .clip(RoundedCornerShape(20.dp)),
             contentAlignment = Alignment.Center
         ) {
             AsyncImage(
                 model = screen.image,
                 contentDescription = null,
-                modifier = Modifier.size(30.dp),
+                modifier = Modifier.size(32.dp),
                 contentScale = ContentScale.Crop
             )
         }
 
         Text(
             text = screen.collapsedStateText,
-            color = Color.White,
-            fontWeight = FontWeight.Medium,
-            fontSize = 16.sp,
+            style = MaterialTheme.typography.headlineLarge.copy(
+                color = MaterialTheme.colorScheme.onPrimary
+            ),
             modifier = Modifier.padding(start = 12.dp)
         )
 
-        // Optional arrow
         Box(
-            modifier = Modifier.weight(1f),
-            contentAlignment = Alignment.CenterEnd
+            modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd
         ) {
-            Text(
-                text = "›",
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+            Icon(
+                painter = painterResource(R.drawable.ic_down_arrow),
+                contentDescription = "down_arrow",
+                tint = MaterialTheme.colorScheme.onPrimary
             )
         }
     }
@@ -339,32 +327,29 @@ fun CollapsedCardContent(screen: OnboardingScreen) {
 @Composable
 fun ExpandedCardContent(screen: OnboardingScreen) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
+        horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize()
     ) {
         Box(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth(), contentAlignment = Alignment.Center
         ) {
             AsyncImage(
                 model = screen.image,
                 contentDescription = null,
                 modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .padding(16.dp),
-                contentScale = ContentScale.Fit
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                contentScale = ContentScale.FillBounds
             )
         }
 
         // Text
         Text(
             text = screen.expandStateText,
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.headlineSmall.copy(
+                color = MaterialTheme.colorScheme.onPrimary
+            ),
             modifier = Modifier.padding(bottom = 24.dp, top = 8.dp)
         )
     }
@@ -388,8 +373,7 @@ fun OnboardingScreen(paddingValues: PaddingValues) {
             strokeEndColor = "#CCFFFFFF",
             startGradient = "#713A65",
             endGradient = "#713A65"
-        ),
-        OnboardingScreen(
+        ), OnboardingScreen(
             image = "https://cdn.myjar.app/Homefeed/engagement_card/G1.png",
             collapsedStateText = "Save extra cash, get returns",
             expandStateText = "Gold's growth is unstoppable!",
@@ -398,8 +382,7 @@ fun OnboardingScreen(paddingValues: PaddingValues) {
             strokeEndColor = "#CCFFFFFF",
             startGradient = "#286642",
             endGradient = "#286642"
-        ),
-        OnboardingScreen(
+        ), OnboardingScreen(
             image = "https://cdn.myjar.app/Homefeed/engagement_card/G3_1.PNG",
             collapsedStateText = "ZERO platform or convenience fees",
             expandStateText = "NO HIDDEN FEES",
@@ -417,11 +400,8 @@ fun OnboardingScreen(paddingValues: PaddingValues) {
             .padding(paddingValues),
         color = MaterialTheme.colorScheme.background
     ) {
-        OnboardingCarousel(
-            screens = onboardingScreens,
-            onFinished = {
-                // Navigate to next screen or handle completion
-            }
-        )
+        OnboardingCarousel(screens = onboardingScreens, onFinished = {
+            // Navigate to next screen or handle completion
+        })
     }
 }
