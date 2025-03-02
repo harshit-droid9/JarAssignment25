@@ -1,12 +1,10 @@
-package tech.oklocation.jar.assignment.composable
+package tech.oklocation.jar.assignment.presentation.onboarding
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,8 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -42,16 +38,12 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import tech.oklocation.jar.assignment.R
-import tech.oklocation.jar.assignment.ui.theme.White
 
 data class OnboardingScreen(
     val image: String,
@@ -81,7 +73,10 @@ suspend fun animateCardBottomToCenter(
 }
 
 suspend fun animateCardCenterToTop(
-    cardState: CardState, topOffsetPx: Float, collapsedHeightPx: Float, durationMillis: Int = 600
+    cardState: CardState,
+    topOffsetPx: Float,
+    collapsedHeightPx: Float,
+    durationMillis: Int = 600,
 ) {
     val animSpec = tween<Float>(durationMillis, easing = FastOutSlowInEasing)
 
@@ -92,7 +87,9 @@ suspend fun animateCardCenterToTop(
 
 @Composable
 fun OnboardingCarousel(
-    screens: List<OnboardingScreen>, onFinished: () -> Unit = {}, autoScrollDelayMs: Long = 2000
+    screens: List<OnboardingScreen>,
+    onFinished: () -> Unit = {},
+    autoScrollDelayMs: Long = 1000,
 ) {
     val config = LocalConfiguration.current
     val density = LocalDensity.current
