@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+
+    id("kotlin-kapt")
 }
 
 android {
@@ -46,7 +48,7 @@ android {
 }
 
 dependencies {
-
+    // Keep existing dependencies
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
@@ -64,10 +66,6 @@ dependencies {
     implementation(libs.retrofit.gson)
     implementation(libs.retrofit)
 
-    implementation(libs.hilt.android)
-    implementation(libs.hilt.android.compiler)
-
-
     implementation(libs.coil.compose)
 
     implementation(libs.coroutines.core)
@@ -76,4 +74,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    implementation(libs.dagger)
+    kapt(libs.dagger.compiler)
 }

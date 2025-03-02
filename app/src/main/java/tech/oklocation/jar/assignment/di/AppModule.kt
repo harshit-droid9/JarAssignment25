@@ -1,16 +1,18 @@
 package tech.oklocation.jar.assignment.di
 
-import dagger.Binds
 import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
+import dagger.Provides
+import tech.oklocation.jar.assignment.data.remote.RemoteDataSource
 import tech.oklocation.jar.assignment.data.repository.RepositoryImpl
-import tech.oklocation.jar.assignment.domain.Repository
+import tech.oklocation.jar.assignment.domain.repository.Repository
+import javax.inject.Singleton
 
 @Module
-@InstallIn(SingletonComponent::class)
-abstract class AppModule {
+class AppModule {
 
-    @Binds
-    abstract fun bindRepository(repositoryImpl: RepositoryImpl): Repository
+    @Provides
+    @Singleton
+    fun provideRepository(remoteDataSource: RemoteDataSource): Repository {
+        return RepositoryImpl(remoteDataSource)
+    }
 }

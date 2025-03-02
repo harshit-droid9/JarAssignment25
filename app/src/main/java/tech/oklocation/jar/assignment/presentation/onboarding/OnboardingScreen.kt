@@ -44,17 +44,7 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import tech.oklocation.jar.assignment.R
-
-data class OnboardingScreen(
-    val image: String,
-    val collapsedStateText: String,
-    val expandStateText: String,
-    val backGroundColor: String,
-    val strokeStartColor: String,
-    val strokeEndColor: String,
-    val startGradient: String,
-    val endGradient: String
-)
+import tech.oklocation.jar.assignment.data.remote.model.EducationCard
 
 class CardState(
     val yOffset: Animatable<Float, *>,
@@ -87,7 +77,7 @@ suspend fun animateCardCenterToTop(
 
 @Composable
 fun OnboardingCarousel(
-    screens: List<OnboardingScreen>,
+    screens: List<EducationCard>,
     onFinished: () -> Unit = {},
     autoScrollDelayMs: Long = 1000,
 ) {
@@ -180,7 +170,9 @@ fun OnboardingCarousel(
                 colors = listOf(
                     parseColor(card.startGradient),
                     parseColor(card.endGradient).copy(alpha = 0.32f)
-                ), startY = 0f, endY = screenHeightPx
+                ),
+                startY = 0f,
+                endY = screenHeightPx,
             )
         }
     }
@@ -223,7 +215,7 @@ fun OnboardingCarousel(
 
 @Composable
 fun OnboardingCard(
-    screen: OnboardingScreen,
+    screen: EducationCard,
     modifier: Modifier = Modifier,
     screenHeightPx: Float,
     cardState: CardState,
@@ -283,7 +275,7 @@ fun HeaderSection() {
 }
 
 @Composable
-fun CollapsedCardContent(screen: OnboardingScreen) {
+fun CollapsedCardContent(screen: EducationCard) {
     Row(
         verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxSize()
     ) {
@@ -322,7 +314,7 @@ fun CollapsedCardContent(screen: OnboardingScreen) {
 }
 
 @Composable
-fun ExpandedCardContent(screen: OnboardingScreen) {
+fun ExpandedCardContent(screen: EducationCard) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize()
     ) {
@@ -359,46 +351,17 @@ fun parseColor(hex: String): Color {
 }
 
 @Composable
-fun OnboardingScreen(paddingValues: PaddingValues) {
-    val onboardingScreens = listOf(
-        OnboardingScreen(
-            image = "https://cdn.myjar.app/Homefeed/engagement_card/G2.png",
-            collapsedStateText = "Buy gold anytime, anywhere",
-            expandStateText = "Get better returns with gold!",
-            backGroundColor = "992D7E",
-            strokeStartColor = "#33FFFFFF",
-            strokeEndColor = "#CCFFFFFF",
-            startGradient = "#713A65",
-            endGradient = "#713A65"
-        ), OnboardingScreen(
-            image = "https://cdn.myjar.app/Homefeed/engagement_card/G1.png",
-            collapsedStateText = "Save extra cash, get returns",
-            expandStateText = "Gold's growth is unstoppable!",
-            backGroundColor = "197A41",
-            strokeStartColor = "#33FFFFFF",
-            strokeEndColor = "#CCFFFFFF",
-            startGradient = "#286642",
-            endGradient = "#286642"
-        ), OnboardingScreen(
-            image = "https://cdn.myjar.app/Homefeed/engagement_card/G3_1.PNG",
-            collapsedStateText = "ZERO platform or convenience fees",
-            expandStateText = "NO HIDDEN FEES",
-            backGroundColor = "722ed1",
-            strokeStartColor = "#33FFFFFF",
-            strokeEndColor = "#CCFFFFFF",
-            startGradient = "#722ed1",
-            endGradient = "#722ed1"
-        )
-    )
-
+fun OnboardingScreen(paddingValues: PaddingValues, educationCardList: List<EducationCard>) {
     Surface(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues),
         color = MaterialTheme.colorScheme.background
     ) {
-        OnboardingCarousel(screens = onboardingScreens, onFinished = {
-            // Navigate to next screen or handle completion
-        })
+        OnboardingCarousel(
+            screens = educationCardList,
+            onFinished = {
+            },
+        )
     }
 }

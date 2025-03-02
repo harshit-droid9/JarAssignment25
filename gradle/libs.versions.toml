@@ -1,6 +1,7 @@
 [versions]
 agp = "8.7.3"
-kotlin = "2.0.0"
+dagger = "2.55"
+daggerCompiler = "2.49"
 coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -10,14 +11,17 @@ activityCompose = "1.10.1"
 composeBom = "2025.02.00"
 retrofit = "2.11.0"
 gson = "2.11.0"
+coilCompose = "2.6.0"
+kotlin = "2.0.0"
+kotlinComposeCompiler = "1.5.3"
 coroutines = "1.10.1"
-hilt = "2.46.1"
-coilCompose = "2.5.0"
 
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+dagger = { module = "com.google.dagger:dagger", version.ref = "dagger" }
+dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "dagger" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -43,11 +47,6 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 # Kotlin Coroutines
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
-
-# Hilt (optional)
-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
-
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
