@@ -1,4 +1,4 @@
-package tech.oklocation.jar.assignment.ui.theme
+package tech.oklocation.jar.assignment.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 

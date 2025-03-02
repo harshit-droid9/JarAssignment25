@@ -9,12 +9,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import tech.oklocation.jar.assignment.R
-import tech.oklocation.jar.assignment.data.remote.model.EducationCard
+import tech.oklocation.jar.assignment.data.remote.model.OnboardingData
 import tech.oklocation.jar.assignment.domain.repository.Repository
 
 sealed interface UiState {
     data object Loading : UiState
-    data class Success(val models: List<EducationCard>) : UiState
+    data class Success(val data: OnboardingData) : UiState
     data class Error(@StringRes val message: Int) : UiState
 }
 
@@ -33,7 +33,7 @@ class MainViewModel(
         viewModelScope.launch {
             try {
                 val response = repository.getOnboardingData()
-                _uiState.value = UiState.Success(response.educationCardList)
+                _uiState.value = UiState.Success(response)
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(R.string.api_error)
             }

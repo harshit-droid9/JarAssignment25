@@ -2,18 +2,24 @@ package tech.oklocation.jar.assignment.presentation.onboarding
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -41,44 +48,53 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import tech.oklocation.jar.assignment.R
 import tech.oklocation.jar.assignment.data.remote.model.EducationCard
+import tech.oklocation.jar.assignment.data.remote.model.OnboardingData
+import tech.oklocation.jar.assignment.data.remote.model.SaveButtonCta
 
-class CardState(
-    val yOffset: Animatable<Float, *>,
-    val height: Animatable<Float, *>,
-    val alpha: Animatable<Float, *>,
-)
 
-suspend fun animateCardBottomToCenter(
-    cardState: CardState, snappingPoint: Float, expandedHeightPx: Float, durationMillis: Int = 800
+@Composable
+fun OnboardingScreen(
+    paddingValues: PaddingValues,
+    onboardingData: OnboardingData,
 ) {
-    val animSpec = tween<Float>(durationMillis, easing = FastOutSlowInEasing)
-
-    cardState.yOffset.animateTo(snappingPoint, animSpec)
-    cardState.height.animateTo(expandedHeightPx, animSpec)
-
-}
-
-suspend fun animateCardCenterToTop(
-    cardState: CardState,
-    topOffsetPx: Float,
-    collapsedHeightPx: Float,
-    durationMillis: Int = 600,
-) {
-    val animSpec = tween<Float>(durationMillis, easing = FastOutSlowInEasing)
-
-    cardState.yOffset.animateTo(topOffsetPx, animSpec)
-    cardState.height.animateTo(collapsedHeightPx, animSpec)
-
+    var showCta by remember { mutableStateOf(false) }
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Box(Modifier.fillMaxSize()) {
+            OnboardingCarousel(
+                screens = onboardingData.educationCardList,
+                onFinished = {
+                    showCta = true
+                },
+            )
+            PrimaryCtaWithLottie(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                cta = onboardingData.saveButtonCta,
+                lottieAnimation = onboardingData.ctaLottie,
+                onCtaClicked = {},
+                isAnimationStarted = showCta
+            )
+        }
+    }
 }
 
 @Composable
 fun OnboardingCarousel(
     screens: List<EducationCard>,
-    onFinished: () -> Unit = {},
+    onFinished: () -> Unit,
     autoScrollDelayMs: Long = 1000,
 ) {
     val config = LocalConfiguration.current
@@ -344,24 +360,120 @@ fun ExpandedCardContent(screen: EducationCard) {
     }
 }
 
+@Composable
+fun PrimaryCtaWithLottie(
+    modifier: Modifier = Modifier,
+    cta: SaveButtonCta,
+    lottieAnimation: String,
+    onCtaClicked: () -> Unit,
+    isAnimationStarted: Boolean,
+) {
+    if (!isAnimationStarted) return
+
+    val startOffsetDp = 200.dp
+    val endOffsetDp = 0.dp
+
+    val slideAnim = remember {
+        Animatable(initialValue = startOffsetDp.value)
+    }
+
+    val fadeAnim = remember {
+        Animatable(initialValue = 0f)
+    }
+
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.Url(lottieAnimation)
+    )
+
+    LaunchedEffect(isAnimationStarted) {
+        slideAnim.animateTo(
+            targetValue = endOffsetDp.value,
+            animationSpec = tween(
+                durationMillis = 800,
+                easing = FastOutSlowInEasing
+            )
+        )
+        fadeAnim.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(
+                durationMillis = 600,
+                easing = LinearEasing
+            )
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 24.dp),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        Box(
+            modifier = modifier
+                .offset(y = slideAnim.value.dp)
+                .alpha(fadeAnim.value)
+                .background(color = parseColor(cta.backgroundColor), CircleShape)
+                .border(1.dp, parseColor(cta.strokeColor), CircleShape)
+                .clickable { onCtaClicked() }
+        ) {
+            Row(
+                modifier = Modifier.padding(vertical = 2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Spacer(modifier.width(16.dp))
+                if (cta.icon != null) {
+                    AsyncImage(
+                        model = rememberAsyncImagePainter(cta.icon),
+                        contentDescription = "cta_icon"
+                    )
+                }
+                Text(
+                    text = cta.text,
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        color = Color.White
+                    )
+                )
+                LottieAnimation(
+                    composition = composition,
+                    modifier = Modifier.size(44.dp),
+                    iterations = LottieConstants.IterateForever
+                )
+                Spacer(modifier.width(16.dp))
+            }
+        }
+    }
+}
 
 fun parseColor(hex: String): Color {
     val colorString = if (hex.startsWith("#")) hex else "#$hex"
     return Color(android.graphics.Color.parseColor(colorString))
 }
 
-@Composable
-fun OnboardingScreen(paddingValues: PaddingValues, educationCardList: List<EducationCard>) {
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        OnboardingCarousel(
-            screens = educationCardList,
-            onFinished = {
-            },
-        )
-    }
+class CardState(
+    val yOffset: Animatable<Float, *>,
+    val height: Animatable<Float, *>,
+    val alpha: Animatable<Float, *>,
+)
+
+suspend fun animateCardBottomToCenter(
+    cardState: CardState, snappingPoint: Float, expandedHeightPx: Float, durationMillis: Int = 800
+) {
+    val animSpec = tween<Float>(durationMillis, easing = FastOutSlowInEasing)
+
+    cardState.yOffset.animateTo(snappingPoint, animSpec)
+    cardState.height.animateTo(expandedHeightPx, animSpec)
+
+}
+
+suspend fun animateCardCenterToTop(
+    cardState: CardState,
+    topOffsetPx: Float,
+    collapsedHeightPx: Float,
+    durationMillis: Int = 600,
+) {
+    val animSpec = tween<Float>(durationMillis, easing = FastOutSlowInEasing)
+
+    cardState.yOffset.animateTo(topOffsetPx, animSpec)
+    cardState.height.animateTo(collapsedHeightPx, animSpec)
+
 }

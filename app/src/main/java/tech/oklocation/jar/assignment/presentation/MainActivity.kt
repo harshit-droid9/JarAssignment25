@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import tech.oklocation.jar.assignment.App
 import tech.oklocation.jar.assignment.presentation.onboarding.OnboardingScreen
-import tech.oklocation.jar.assignment.ui.theme.JarAssignmentTheme
+import tech.oklocation.jar.assignment.presentation.theme.JarAssignmentTheme
 import javax.inject.Inject
 
 class MainActivity : ComponentActivity() {
@@ -27,15 +27,12 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var viewModelFactory: MainViewModelFactory
 
-    private val viewModel: MainViewModel by viewModels {
-        viewModelFactory
-    }
+    private val viewModel: MainViewModel by viewModels { viewModelFactory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         (application as App).appComponent.inject(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
         setContent {
             JarAssignmentTheme {
                 MainContent(viewModel)
@@ -59,8 +56,8 @@ fun MainContent(viewModel: MainViewModel) {
             }
 
             is UiState.Success -> {
-                val cards = (uiState as UiState.Success).models
-                OnboardingScreen(paddingValues = innerPadding, educationCardList = cards)
+                val data = (uiState as UiState.Success).data
+                OnboardingScreen(paddingValues = innerPadding, onboardingData = data)
             }
 
             is UiState.Error -> {
