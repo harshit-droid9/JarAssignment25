@@ -96,7 +96,7 @@ Here's a list of major libraries used in the project (some version references ar
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/<YourUsername>/OnboardingAnimation.git
+   git clone https://github.com/harshit-droid9/JarAssignment25.git
    cd OnboardingAnimation
    ```
 
