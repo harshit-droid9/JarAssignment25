@@ -36,7 +36,7 @@ app/
 ┃ ┣ model/       # Data models (DTOs)
 ┃ ┗ repository/  # Repository implementation
 ┣ domain
-┃ ┣ repository/ # Respository interface
+┃ ┗ repository/ # Respository interface
 ┣ di/            # Dagger modules and component(s)
 ┣ presentation/
 ┃ ┣ onboarding/  # Onboarding UI screens & composables
