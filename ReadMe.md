@@ -42,9 +42,8 @@ app/
 ┣ di/ # Dagger modules and component(s)
 ┣ presentation/
 ┃ ┣ onboarding/ # Onboarding UI screens & composables
-┃ ┗ MainViewModel/ # Example of a ViewModel with state flows
-┣ presentation/ # Theming, shared UI components
-┣ MainActivity.kt
+┃ ┣ MainViewModel/ # Example of a ViewModel with state flows
+┃ ┣ MainActivity.kt
 ┗ App
 
 Flow of Data
@@ -123,18 +122,30 @@ API Reference
 • Data Model: The JSON typically includes a list of “education cards” with images, text, and some
 animation parameters.
 
-Example JSON snippet:
-``Json``
+````json
 {
-"educationCardList": [
-{
-"icon": "https://example.com/icon.png",
-"text": "Welcome to the app!"
-},
-...
-]
+  "success": true,
+  "data": {
+    "onboardingData": {
+      "toolBarText": "Onboarding",
+      "introTitle": "Introducing",
+      "introSubtitle": "One-time save",
+      "educationCardList": [
+        {
+          "image": "https://cdn.myjar.app/Homefeed/engagement_card/G2.png",
+          "collapsedStateText": "Gold beats FD",
+          "expandStateText": "Get better returns with gold!",
+          "backGroundColor": "992D7E",
+          "strokeStartColor": "#33FFFFFF",
+          "strokeEndColor": "#CCFFFFFF",
+          "startGradient": "#713A65",
+          "endGradient": "#713A65"
+        }
+      ]
+    }
+  }
 }
-
+````
 ````
 Future Scopes:
 - Cards should tilt diagonally when shrinks,
