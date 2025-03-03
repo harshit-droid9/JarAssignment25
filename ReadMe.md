@@ -140,3 +140,5 @@ Future Scopes:
 - Cards should tilt diagonally when shrinks,
 - Cards click listeners, when clicking on the card, should reopening, cards should realigned themselves
 - Move Dagger to hilt, to reduce boilerplate code.
+- Deeplink support
+- Intro screen
