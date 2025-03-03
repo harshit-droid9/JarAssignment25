@@ -5,24 +5,23 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import tech.oklocation.jar.assignment.App
+import tech.oklocation.jar.assignment.presentation.landing.LandingScreen
 import tech.oklocation.jar.assignment.presentation.onboarding.OnboardingScreen
 import tech.oklocation.jar.assignment.presentation.theme.JarAssignmentTheme
 import javax.inject.Inject
 
 class MainActivity : ComponentActivity() {
+
+    companion object {
+        const val NAV_ONBOARDING_SCREEN = "/onboarding"
+        const val NAV_LANDING_SCREEN = "/landing"
+    }
 
     @Inject
     lateinit var viewModelFactory: MainViewModelFactory
@@ -39,38 +38,28 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
 
-@Composable
-fun MainContent(viewModel: MainViewModel) {
-    val uiState by viewModel.uiState.collectAsState()
-
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        when (uiState) {
-            is UiState.Loading -> {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
+    @Composable
+    fun MainContent(viewModel: MainViewModel) {
+        val navController = rememberNavController()
+        NavHost(
+            navController = navController,
+            startDestination = NAV_ONBOARDING_SCREEN,
+            modifier = Modifier
+        ) {
+            composable(NAV_ONBOARDING_SCREEN) {
+                OnboardingScreen(
+                    viewModel = viewModel,
+                    onNavigateToLandingPage = { navController.navigate(NAV_LANDING_SCREEN) },
+                )
             }
 
-            is UiState.Success -> {
-                val data = (uiState as UiState.Success).data
-                OnboardingScreen(paddingValues = innerPadding, onboardingData = data)
-            }
-
-            is UiState.Error -> {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        text = stringResource((uiState as UiState.Error).message),
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                }
+            composable(NAV_LANDING_SCREEN) {
+                LandingScreen()
             }
         }
     }
-}
 
+}
 
 

@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">JarAssignment</string>
     <string name="onboarding">Onboarding</string>
-    <string name="api_error">"Something went wrong"</string>
+    <string name="landing">Landing</string>
+    <string name="api_error">Something went wrong</string>
+    <string name="regular_error">Something went wrong</string>
 </resources>

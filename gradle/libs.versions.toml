@@ -1,7 +1,6 @@
 [versions]
 agp = "8.7.3"
 dagger = "2.55"
-daggerCompiler = "2.49"
 coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -14,8 +13,8 @@ retrofit = "2.11.0"
 gson = "2.11.0"
 coilCompose = "2.6.0"
 kotlin = "2.0.0"
-kotlinComposeCompiler = "1.5.3"
 coroutines = "1.10.1"
+navigation-compose = "2.6.0"
 
 
 [libraries]
@@ -49,6 +48,9 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 # Kotlin Coroutines
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+
+# navigation
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation-compose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

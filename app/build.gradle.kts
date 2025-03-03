@@ -72,6 +72,8 @@ dependencies {
     implementation(libs.coroutines.android)
     implementation(libs.lottie.compose)
 
+    implementation(libs.androidx.navigation.compose)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

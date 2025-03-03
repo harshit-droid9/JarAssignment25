@@ -23,10 +23,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -44,7 +46,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
@@ -59,12 +60,57 @@ import tech.oklocation.jar.assignment.R
 import tech.oklocation.jar.assignment.data.remote.model.EducationCard
 import tech.oklocation.jar.assignment.data.remote.model.OnboardingData
 import tech.oklocation.jar.assignment.data.remote.model.SaveButtonCta
+import tech.oklocation.jar.assignment.presentation.MainViewModel
+import tech.oklocation.jar.assignment.presentation.UiState
+import tech.oklocation.jar.assignment.presentation.composables.ErrorScreen
+import tech.oklocation.jar.assignment.presentation.composables.HeaderSection
+import tech.oklocation.jar.assignment.presentation.composables.LoadingScreen
 
 
 @Composable
-fun OnboardingScreen(
+fun OnboardingScreen(viewModel: MainViewModel, onNavigateToLandingPage: () -> Unit) {
+    val coroutineScope = rememberCoroutineScope()
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            viewModel.loadOnboardingData()
+        }
+    }
+    val uiState by viewModel.uiState.collectAsState()
+
+    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+        when (uiState) {
+            is UiState.Loading -> {
+                LoadingScreen(innerPadding)
+            }
+
+            is UiState.Success -> {
+                val onboardingData = (uiState as UiState.Success).onboardingData
+                if (onboardingData == null) {
+                    ErrorScreen(innerPadding, R.string.regular_error)
+                } else {
+                    OnboardingContent(
+                        paddingValues = innerPadding,
+                        onboardingData = onboardingData,
+                        onNavigateToLandingPage = onNavigateToLandingPage
+                    )
+                }
+            }
+
+            is UiState.Error -> {
+                ErrorScreen(
+                    paddingValues = innerPadding,
+                    errorMessage = (uiState as UiState.Error).message
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun OnboardingContent(
     paddingValues: PaddingValues,
     onboardingData: OnboardingData,
+    onNavigateToLandingPage: () -> Unit
 ) {
     var showCta by remember { mutableStateOf(false) }
     Surface(
@@ -84,7 +130,7 @@ fun OnboardingScreen(
                 modifier = Modifier.align(Alignment.BottomCenter),
                 cta = onboardingData.saveButtonCta,
                 lottieAnimation = onboardingData.ctaLottie,
-                onCtaClicked = {},
+                onCtaClicked = onNavigateToLandingPage,
                 isAnimationStarted = showCta
             )
         }
@@ -92,7 +138,7 @@ fun OnboardingScreen(
 }
 
 @Composable
-fun OnboardingCarousel(
+private fun OnboardingCarousel(
     screens: List<EducationCard>,
     onFinished: () -> Unit,
     autoScrollDelayMs: Long = 1000,
@@ -200,7 +246,7 @@ fun OnboardingCarousel(
             .fillMaxSize()
             .background(backgroundGradient[currentIndex])
     ) {
-        HeaderSection()
+        HeaderSection(R.string.onboarding)
 
         Box(
             modifier = Modifier
@@ -230,7 +276,7 @@ fun OnboardingCarousel(
 }
 
 @Composable
-fun OnboardingCard(
+private fun OnboardingCard(
     screen: EducationCard,
     modifier: Modifier = Modifier,
     screenHeightPx: Float,
@@ -265,33 +311,7 @@ fun OnboardingCard(
 
 
 @Composable
-fun HeaderSection() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp, start = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-
-        Icon(
-            modifier = Modifier,
-            painter = painterResource(R.drawable.ic_back_button),
-            contentDescription = "back button",
-            tint = Color.White
-        )
-
-        Text(
-            text = stringResource(R.string.onboarding),
-            style = MaterialTheme.typography.headlineMedium.copy(
-                color = MaterialTheme.colorScheme.onPrimary
-            ),
-            modifier = Modifier.padding(start = 16.dp)
-        )
-    }
-}
-
-@Composable
-fun CollapsedCardContent(screen: EducationCard) {
+private fun CollapsedCardContent(screen: EducationCard) {
     Row(
         verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxSize()
     ) {
@@ -361,7 +381,7 @@ fun ExpandedCardContent(screen: EducationCard) {
 }
 
 @Composable
-fun PrimaryCtaWithLottie(
+private fun PrimaryCtaWithLottie(
     modifier: Modifier = Modifier,
     cta: SaveButtonCta,
     lottieAnimation: String,
@@ -389,14 +409,14 @@ fun PrimaryCtaWithLottie(
         slideAnim.animateTo(
             targetValue = endOffsetDp.value,
             animationSpec = tween(
-                durationMillis = 800,
+                durationMillis = 300,
                 easing = FastOutSlowInEasing
             )
         )
         fadeAnim.animateTo(
             targetValue = 1f,
             animationSpec = tween(
-                durationMillis = 600,
+                durationMillis = 300,
                 easing = LinearEasing
             )
         )
@@ -444,7 +464,7 @@ fun PrimaryCtaWithLottie(
     }
 }
 
-fun parseColor(hex: String): Color {
+private fun parseColor(hex: String): Color {
     val colorString = if (hex.startsWith("#")) hex else "#$hex"
     return Color(android.graphics.Color.parseColor(colorString))
 }
@@ -455,7 +475,7 @@ class CardState(
     val alpha: Animatable<Float, *>,
 )
 
-suspend fun animateCardBottomToCenter(
+private suspend fun animateCardBottomToCenter(
     cardState: CardState, snappingPoint: Float, expandedHeightPx: Float, durationMillis: Int = 800
 ) {
     val animSpec = tween<Float>(durationMillis, easing = FastOutSlowInEasing)
@@ -465,7 +485,7 @@ suspend fun animateCardBottomToCenter(
 
 }
 
-suspend fun animateCardCenterToTop(
+private suspend fun animateCardCenterToTop(
     cardState: CardState,
     topOffsetPx: Float,
     collapsedHeightPx: Float,
@@ -475,5 +495,4 @@ suspend fun animateCardCenterToTop(
 
     cardState.yOffset.animateTo(topOffsetPx, animSpec)
     cardState.height.animateTo(collapsedHeightPx, animSpec)
-
 }
