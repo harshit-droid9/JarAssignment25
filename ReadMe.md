@@ -34,7 +34,9 @@ app/
 ┣ data/
 ┃ ┣ remote/      # Retrofit API service definitions
 ┃ ┣ model/       # Data models (DTOs)
-┃ ┗ repository/  # Repository interface and implementation
+┃ ┗ repository/  # Repository implementation
+┣ domain
+┃ ┣ repository/ # Respository interface
 ┣ di/            # Dagger modules and component(s)
 ┣ presentation/
 ┃ ┣ onboarding/  # Onboarding UI screens & composables
